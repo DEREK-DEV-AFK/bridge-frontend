@@ -1,0 +1,12 @@
+.footer-main {
+    margin: 50px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-para > a {
+    color: black;
+    text-decoration:dashed;
+    font-size: larger;
+}
