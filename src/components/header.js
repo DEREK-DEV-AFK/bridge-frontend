@@ -15,13 +15,17 @@ const Header = ({Address, updateAddress}) => {
     }
 
     const btnDisconnect = () => {
-        updateAddress("");
+        updateAddress({
+            address: ""
+        });
     }
 
     // Function for getting handling all events
   const accountChangeHandler = (account) => {
     // Setting an address data
-    updateAddress(account);
+    updateAddress({
+        address: account
+    });
   };
 
     return (

@@ -7,12 +7,16 @@ import { useState } from 'react';
 
 
 function App() {
-  const [address, setAddress] = useState("");
+  const [userInfo, setUserInfo] = useState({
+    address: "",
+    TokenEthBalance: "",
+    TokenPolyBalance: ""
+  });
 
   return (
     <div className="App">
-      <Header Address={address} updateAddress={setAddress}/>
-      <Main address={address}/>
+      <Header Address={userInfo.address} updateAddress={setUserInfo}/>
+      <Main userInfo={userInfo} updateUserInfo={setUserInfo}/>
       <Footer/>
     </div>
   );
