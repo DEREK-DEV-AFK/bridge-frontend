@@ -24,14 +24,14 @@ const Subheader = ({userInfo , updateUserInfo}) => {
 
       useEffect(() => {
         const fetchBalance = async () => {
-          if (userInfo.address !== "") {
+          if (userInfo.address !== "" ) {
             try {
                 setLoading(true);  
               const response = await getBalanceSeploia(userInfo.address);
               const response2 = await getBalanceMumbai(userInfo.address);
               console.log("resp ",response);
               console.log("resp2 ",response2);
-              if (response.msg !== false || response2.msg !== false) {
+              if (response.msg === false || response2.msg === false) {
                 console.log("API error get balance");
               } 
               updateUserInfo(prevState => ({
@@ -52,7 +52,13 @@ const Subheader = ({userInfo , updateUserInfo}) => {
     if(loading){
         return(
             <div className='subheader-main'>
-                Loading.....
+              <div className='left'>
+                Loading.... <b>TokenETH</b>
+              </div>
+              <div className='right'>
+                Loading.... <b>TokenPOLY</b>
+              </div>
+                
             </div>
         )
     }  

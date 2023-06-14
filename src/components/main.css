@@ -1,6 +1,16 @@
 .main-main {
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
     min-height: 450px;
+}
+
+.main-left-form, .main-right-form {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0px 0px 0px;
+}
+
+.to-textarea, .amount-textarea  {
+    margin: 0px 0px 10px 0px;
 }

@@ -16,9 +16,9 @@ function App() {
 
   useEffect(() => {
     if(window.ethereum) {
-      window.ethereum.on('chainChanged', () => {
-        window.location.reload();
-      })
+      // window.ethereum.on('chainChanged', () => {
+      //   window.location.reload();
+      // })
       window.ethereum.on('accountsChanged', () => {
         window.location.reload();
       })
@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="App">
       <Header Address={userInfo.address} updateAddress={setUserInfo}/>
-      <Subheader userInfo={userInfo} updateUserInfo={setUserInfo}/>
+      <Subheader userInfo={userInfo} userBalance={userBalance} updateUserInfo={setUserInfo}/>
       <Main userInfo={userInfo} updateUserInfo={setUserInfo}/>
       <Footer/>
     </div>

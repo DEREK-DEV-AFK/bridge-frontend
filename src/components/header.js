@@ -15,9 +15,10 @@ const Header = ({Address, updateAddress}) => {
     }
 
     const btnDisconnect = () => {
-        updateAddress({
+        updateAddress(prevState => ({
+            ...prevState,
             address: ""
-        });
+        }));
     }
 
     // Function for getting handling all events
