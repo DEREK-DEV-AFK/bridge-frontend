@@ -35,7 +35,7 @@ const Header = ({Address, updateAddress}) => {
                 <h3>Centralised Bridge</h3>
             </div>
             <div className='main-right'>
-                <button onClick={Address === "" ? btnHandler : btnDisconnect }>{Address === "" ? "Connect" : Address.substring(0,6)+"...."+Address.substring(Address.length-6)}</button>
+                <button className='btn-connect' onClick={Address === "" ? btnHandler : btnDisconnect }>{Address === "" ? "Connect" : Address.substring(0,6)+"...."+Address.substring(Address.length-6)}</button>
             </div>
         </div>        
     )

@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="App">
       <Header Address={userInfo.address} updateAddress={setUserInfo}/>
-      <Subheader userInfo={userInfo} userBalance={userBalance} updateUserInfo={setUserInfo}/>
+      <Subheader userInfo={userInfo} updateUserInfo={setUserInfo}/>
       <Main userInfo={userInfo} updateUserInfo={setUserInfo}/>
       <Footer/>
     </div>

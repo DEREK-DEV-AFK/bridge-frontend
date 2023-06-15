@@ -3,3 +3,9 @@
     justify-content: space-around;
     align-items: center;
 }
+
+.btn-connect {
+    height: 30px;
+    width: 70px;
+    border-radius: 5px;
+}

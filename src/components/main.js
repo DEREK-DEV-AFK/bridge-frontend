@@ -33,14 +33,16 @@ const Main = ({ userInfo, updateUserInfo }) => {
   const transferFromMumbai = async (from, to, amount) => {
     try {
       console.log("data receiced in api requst ", from, to, amount);
-      return await axios.post(`http://localhost:5000/mumbai/burn`,{
-        from: from,
-        to: to,
-        amount: amount,
-      }).then((response) => {
-        console.log("2. server response:", response.data);
-        return response.data;
-      });
+      return await axios
+        .post(`http://localhost:5000/mumbai/burn`, {
+          from: from,
+          to: to,
+          amount: amount,
+        })
+        .then((response) => {
+          console.log("2. server response:", response.data);
+          return response.data;
+        });
     } catch (err) {
       console.log("error caliing burn txn api mumbai ", err.message);
       alert("api error");
@@ -49,33 +51,24 @@ const Main = ({ userInfo, updateUserInfo }) => {
 
   useEffect(() => {
     const checkCurrentNetworkOrSwitch = async (chainIdToSwitch) => {
-        console.log("chain id to switch ", chainIdToSwitch);
+      console.log("chain id to switch ", chainIdToSwitch);
       if (window.ethereum.networkVersion !== chainIdToSwitch) {
         try {
           await window.ethereum.request({
             method: "wallet_switchEthereumChain",
-            params: [{ chainId: ethers.utils.hexValue(Number(chainIdToSwitch)) }],
+            params: [
+              { chainId: ethers.utils.hexValue(Number(chainIdToSwitch)) },
+            ],
           });
+          return true;
         } catch (err) {
-            console.log("err of network switch", err.message, err.code)
+          console.log("err of network switch", err.message, err.code);
           // This error code indicates that the chain has not been added to MetaMask
           if (err.code === 4902) {
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainName: "Polygon Mainnet",
-                  chainId: ethers.utils.hexValue(chainIdToSwitch),
-                  nativeCurrency: {
-                    name: "MATIC",
-                    decimals: 18,
-                    symbol: "MATIC",
-                  },
-                  rpcUrls: ["https://polygon-rpc.com/"],
-                },
-              ],
-            });
+            alert("chain does not exist !");
           }
+
+          return false;
         }
       } else {
         return true;
@@ -83,81 +76,92 @@ const Main = ({ userInfo, updateUserInfo }) => {
     };
 
     const updateBalance = async (user) => {
-        try {
-            const mumbaiBalance = await getBalanceMumbai(user);
-            const sepoliaBalance = await getBalanceSeploia(user);
+      try {
+        const mumbaiBalance = await getBalanceMumbai(user);
+        const sepoliaBalance = await getBalanceSeploia(user);
 
-            console.log("res ", mumbaiBalance.result, sepoliaBalance.result);
+        console.log("res ", mumbaiBalance.result, sepoliaBalance.result);
 
-            return {"mumbaiBalance":mumbaiBalance.result, "sepoliaBalance": sepoliaBalance.result};
-
-        } catch(err) {
-            console.log("error while updating balance ", err.message);
-            return false;
-        }
-        
-    }
+        return {
+          mumbaiBalance: mumbaiBalance.result,
+          sepoliaBalance: sepoliaBalance.result,
+        };
+      } catch (err) {
+        console.log("error while updating balance ", err.message);
+        return false;
+      }
+    };
 
     const fetch = async () => {
-      console.log("get data ", getData);
-      if (hasRequestedMumbai === true) {
-        console.log("states", getData.from, getData.to, getData.amount);
-        const result = await transferFromSeploia(
-          getData.from,
-          getData.to,
-          getData.amount
-        );
-        console.log("api mumabi resposne ", result);
+      if (hasRequestedMumbai === true || hasRequestedSepolia === true) {
+        console.log("get data ", getData);
 
-        setData("");
-        setApiResp(result);
-        setHasRequestedMumbai(false);
-      }
+        if (hasRequestedMumbai === true) {
+          console.log("states", getData.from, getData.to, getData.amount);
+          const result = await transferFromMumbai(
+            getData.from,
+            getData.to,
+            getData.amount
+          );
+          console.log("api mumabi resposne ", result);
 
-      if (hasRequestedSepolia === true) {
-        console.log("states", getData.from, getData.to, getData.amount);
-        const result = await transferFromSeploia(
-          getData.from,
-          getData.to,
-          getData.amount
-        );
-        console.log("api sepolia resposne ", result);
+          if (result) {
+            let phraseJson = JSON.parse(result.result);
+            phraseJson.from = getData.from;
 
-        if (result) {
-          let phraseJson = JSON.parse(result.result);
-          phraseJson.from = getData.from;
+            setData("");
+            setApiResp(phraseJson);
+            setHasRequestedSepolia(false);
 
-          setData("");
-          setApiResp(phraseJson);
-          setHasRequestedSepolia(false);
-
-          console.log("use state ", apiResp);
-
-          try {
-            await checkCurrentNetworkOrSwitch(apiResp.chainId);
-            const resultMetamsk = await window.ethereum.request({
-              method: "eth_sendTransaction",
-              params: [
-                {
-                  from: apiResp.from,
-                  to: apiResp.to,
-                  data: apiResp.data,
-                },
-              ],
-            });
-
-            console.log("metamask ", resultMetamsk);
-            alert("txn success ", resultMetamsk);
-            const updatedBalance = await updateBalance(apiResp.from); 
-            console.log("updated values ", updatedBalance);
-            updateUserInfo(prevState => ({
-                ...prevState,
-                TokenEthBalance: updatedBalance.sepoliaBalance,
-                TokenPolyBalance: updatedBalance.mumbaiBalance,
-              }))
-          } catch (err) {
-            console.log("metamask erro ", err.message);
+            console.log("use state ", apiResp);
           }
+        }
+
+        if (hasRequestedSepolia === true) {
+          console.log("states", getData.from, getData.to, getData.amount);
+          const result = await transferFromSeploia(
+            getData.from,
+            getData.to,
+            getData.amount
+          );
+          console.log("api sepolia resposne ", result);
+
+          if (result) {
+            let phraseJson = JSON.parse(result.result);
+            phraseJson.from = getData.from;
+
+            setData("");
+            setApiResp(phraseJson);
+            setHasRequestedSepolia(false);
+
+            console.log("use state ", apiResp);
+          }
+        }
+
+        try {
+          await checkCurrentNetworkOrSwitch(apiResp.chainId);
+          const resultMetamsk = await window.ethereum.request({
+            method: "eth_sendTransaction",
+            params: [
+              {
+                from: apiResp.from,
+                to: apiResp.to,
+                data: apiResp.data,
+              },
+            ],
+          });
+
+          console.log("metamask ", resultMetamsk);
+          alert("txn success ", resultMetamsk);
+          const updatedBalance = await updateBalance(apiResp.from);
+          console.log("updated values ", updatedBalance);
+          updateUserInfo((prevState) => ({
+            ...prevState,
+            TokenEthBalance: updatedBalance.sepoliaBalance,
+            TokenPolyBalance: updatedBalance.mumbaiBalance,
+          }));
+        } catch (err) {
+          console.log("metamask erro ", err.message);
         }
       }
     };
@@ -200,8 +204,10 @@ const Main = ({ userInfo, updateUserInfo }) => {
   const handleClickMumbai = async (event) => {
     event.preventDefault();
     let to = event.target.toRight.value,
-      amount = event.target.amountRight.value;
+      amount = event.target.amountRight.value,
+      from = userInfo.address;
     console.log(to);
+    console.log(from);
     console.log(amount, typeof amount);
     if (userInfo.address === "") {
       alert("no user connected");
@@ -218,8 +224,16 @@ const Main = ({ userInfo, updateUserInfo }) => {
       return;
     }
 
-    const result = await transferFromMumbai(userInfo.address, to, amount);
-    console.log("api mumbai resposne ", result);
+    // const result = await transferFromMumbai(userInfo.address, to, amount);
+    // console.log("api mumbai resposne ", result);
+
+    setData({
+      from: from,
+      to: to,
+      amount: amount,
+    });
+
+    setHasRequestedMumbai(true);
   };
 
   return (
@@ -239,10 +253,58 @@ const Main = ({ userInfo, updateUserInfo }) => {
             id="amountLeft"
             name="amountLeft"
           />
-          <button /*disabled={loading ? loading : false}*/>Burn</button>
+          <button
+            className="btn-submit" /*disabled={loading ? loading : false}*/
+          >
+            Burn
+          </button>
         </form>
         {/*loading ? <>Sending....</> : <></>*/}
         {/* <button onClick={handleClickSepolia} >Burn</button> */}
+      </div>
+      <div class="wrapper">
+        <svg
+          width="18px"
+          height="17px"
+          viewBox="0 0 18 17"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g
+            id="prev"
+            transform="translate(8.500000, 8.500000) scale(-1, 1) translate(-8.500000, -8.500000)"
+          >
+            <polygon
+              class="arrow"
+              points="16.3746667 8.33860465 7.76133333 15.3067621 6.904 14.3175671 14.2906667 8.34246869 6.908 2.42790698 7.76 1.43613596"
+            ></polygon>
+            <polygon
+              class="arrow-fixed"
+              points="16.3746667 8.33860465 7.76133333 15.3067621 6.904 14.3175671 14.2906667 8.34246869 6.908 2.42790698 7.76 1.43613596"
+            ></polygon>
+            <path d="M-1.48029737e-15,0.56157424 L-1.48029737e-15,16.1929159 L9.708,8.33860465 L-2.66453526e-15,0.56157424 L-1.48029737e-15,0.56157424 Z M1.33333333,3.30246869 L7.62533333,8.34246869 L1.33333333,13.4327013 L1.33333333,3.30246869 L1.33333333,3.30246869 Z"></path>
+          </g>
+        </svg>
+
+        <svg
+          width="18px"
+          height="17px"
+          viewBox="-1 0 18 17"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g>
+            <polygon
+              class="arrow"
+              points="16.3746667 8.33860465 7.76133333 15.3067621 6.904 14.3175671 14.2906667 8.34246869 6.908 2.42790698 7.76 1.43613596"
+            ></polygon>
+            <polygon
+              class="arrow-fixed"
+              points="16.3746667 8.33860465 7.76133333 15.3067621 6.904 14.3175671 14.2906667 8.34246869 6.908 2.42790698 7.76 1.43613596"
+            ></polygon>
+            <path d="M-4.58892184e-16,0.56157424 L-4.58892184e-16,16.1929159 L9.708,8.33860465 L-1.64313008e-15,0.56157424 L-4.58892184e-16,0.56157424 Z M1.33333333,3.30246869 L7.62533333,8.34246869 L1.33333333,13.4327013 L1.33333333,3.30246869 L1.33333333,3.30246869 Z"></path>
+          </g>
+        </svg>
       </div>
       <div className="main-right">
         <b>Mumbai</b>
@@ -259,7 +321,7 @@ const Main = ({ userInfo, updateUserInfo }) => {
             id="amountRight"
             name="amountRight"
           />
-          <button /*disabled={loading}*/>Burn</button>
+          <button className="btn-submit" /*disabled={loading}*/>Burn</button>
         </form>
         {/*loading ? <>Sending....</> : <></>*/}
       </div>
